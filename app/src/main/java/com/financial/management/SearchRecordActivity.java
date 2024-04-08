@@ -119,6 +119,7 @@ public class SearchRecordActivity extends AppCompatActivity {
             listView.setAdapter(simpleAdapter);
 
         }
+        cursor.close();
     }
 
     //时间和类别spinner点击事件

@@ -13,6 +13,7 @@
         <activity android:name="com.financial.management.SearchRecordActivity" />
         <activity android:name="com.financial.management.RegisterActivity"/>
         <activity android:name="com.financial.management.UserCenterActivity" />
+        <activity android:name="com.financial.management.RecordChartActivity" />
         <activity android:name="com.financial.management.MainActivity"
             android:exported="true">
 

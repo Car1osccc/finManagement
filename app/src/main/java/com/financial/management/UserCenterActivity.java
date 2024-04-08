@@ -52,7 +52,7 @@ public class UserCenterActivity extends AppCompatActivity {
         btn_calcmoney.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent3=new Intent(getApplicationContext(),SearchRecordActivity.class);
+                Intent intent3=new Intent(getApplicationContext(),RecordChartActivity.class);
                 startActivity(intent3);
             }
         });
