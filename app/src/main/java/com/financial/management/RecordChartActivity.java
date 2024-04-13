@@ -11,11 +11,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +54,14 @@ public class RecordChartActivity extends AppCompatActivity {
                 // listView.setVisibility(View.GONE);
                 Toast.makeText(getApplicationContext(), "无数据", Toast.LENGTH_SHORT).show();
             }else{
+                List<String> dates = new ArrayList<>();
                 while (cursor.moveToNext()) {
+                    dates.add(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
                     entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM")), cursor.getString(cursor.getColumnIndex(COLUMN_DATE))));
                     i++;
+                }
+                for (int j = 0; j < dates.size(); j++) {
+                    System.out.println(dates.get(j));
                 }
                 System.out.println(entries.size());
                 BarDataSet dataSet = new BarDataSet(entries, "Money"); // add entries to dataset
@@ -61,7 +70,17 @@ public class RecordChartActivity extends AppCompatActivity {
                 barChart1.setDrawGridBackground(false);
                 barChart1.getDescription().setText("Daily income statistics");
                 barChart1.getDescription().setPosition(900,100);                barChart1.getDescription().setTextSize(12);
-                barChart1.getXAxis().setDrawGridLines(false);
+                XAxis xAxis = barChart1.getXAxis();
+                xAxis.setGranularity(1);
+                xAxis.setLabelCount(dates.size());
+                xAxis.setDrawGridLines(false);
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        return dates.get((int) value);
+                    }
+                });
                 barChart1.invalidate(); // refresh
             }
 
@@ -73,18 +92,30 @@ public class RecordChartActivity extends AppCompatActivity {
                 // listView.setVisibility(View.GONE);
                 Toast.makeText(getApplicationContext(), "无数据", Toast.LENGTH_SHORT).show();
             }else{
+                List<String> dates = new ArrayList<>();
                 while (cursor.moveToNext()) {
-                    entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM")), cursor.getString(cursor.getColumnIndex(COLUMN_DATE))));
+                    dates.add(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
+                    entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM"))));
                     i++;
                 }
-                System.out.println(entries.size());
+
                 BarDataSet dataSet = new BarDataSet(entries, "Money"); // add entries to dataset
                 BarData barData = new BarData(dataSet);
                 barChart2.setData(barData);
                 barChart2.getDescription().setText("Daily expenditure statistics");
                 barChart2.getDescription().setPosition(900,100);
                 barChart2.getDescription().setTextSize(12);
-                barChart2.getXAxis().setDrawGridLines(false);
+                XAxis xAxis = barChart2.getXAxis();
+                xAxis.setGranularity(1);
+                xAxis.setLabelCount(dates.size());
+                xAxis.setDrawGridLines(false);
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        return dates.get((int) value);
+                    }
+                });
                 barChart2.invalidate(); // refresh
             }
 
