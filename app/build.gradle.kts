@@ -2,13 +2,14 @@ plugins {
     alias(libs.plugins.androidApplication)
 }
 
+
 android {
     namespace = "com.financial.management"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.financial.management"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -33,8 +34,10 @@ android {
 
 dependencies {
 
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation(libs.appcompat)
     implementation(libs.material)
+    implementation("org.projectlombok:lombok:1.18.28")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
