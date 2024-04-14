@@ -21,16 +21,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-//收支记录页面业务逻辑
+//Income and expenditure record business logic
 public class SearchRecordActivity extends AppCompatActivity {
-    //定义spinner中的数据
     private String[] date_data= {"", "202101", "202102", "202103", "202104", "202105","202106","202107","202108","202109","202110","202111","202112"};
-    private String[] type_data = {"", "收入", "支出"};
+    private String[] type_data = {"", "Income", "Expense"};
     Spinner spin_date, spin_type;
     ListView listView;
     TextView tv_show;
     float sum=0;
-    //数据库
+
     private String selectDate, selectType;
     private static final String DATABASE_NAME = "Test.db";
     private static final String TABLE_NAME = "record";
@@ -42,18 +41,17 @@ public class SearchRecordActivity extends AppCompatActivity {
     private SQLiteDatabase sqLiteDatabase = null;
 
     private void selectSumMoney() {
-        //自定义查询的sql语句
         String sql;
-        //如果查询时间和查询类型都为空，则查询整个表
+        //If no query time or query type, query the entire table
         if (TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME;
-            //如果有查询时间，没有查询类型，查询指定内容
+            //If has query time but no query type, query the specified content
         } else if (!TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "'";
-            //如果没有查询时间，有查询类型，查询指定内容
-        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {//如果没有查询时间，有查询类型
+            //If no query time but has query type, query the specified content
+        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where type='" + selectType+"'";
-        } else {//否则，查询条件都不为空，查询指定内容
+        } else {
             sql ="select * from " + TABLE_NAME + " where date='" + selectDate + "' and type='" + selectType+"'";
         }
         Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
@@ -69,31 +67,31 @@ public class SearchRecordActivity extends AppCompatActivity {
         tv_show.setText(money2);
         sum=0;
     }
-    //选择数据
+
     private void selectData() {
-        //自定义查询的sql语句
         String sql;
-        //如果查询时间和查询类型都为空，则查询整个表
+        //If no query time or query type, select the entire table
         if (TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME;
-            //如果有查询时间，没有查询类型，查询指定内容
+            //If has query time but no query type, select the specified content
         } else if (!TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "'";
-            //如果没有查询时间，有查询类型，查询指定内容
-        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {//如果没有查询时间，有查询类型
+            //If no query time but has query type, select the specified content
+        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where type='" + selectType+"'";
-        } else {//否则，查询条件都不为空，查询指定内容
+        } else {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "' and type='" + selectType+"'";
         }
-        //将查询到的数据封装到Cursor
+
+        //Encapsulate the queried data into Cursor
         Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
         ArrayList<Map<String, String>> list = new ArrayList<Map<String, String>>();
         if (cursor.getCount() == 0) {
-            //查无数据则怒不显示列表
+            //If no data is found, the list will not be displayed
             // listView.setVisibility(View.GONE);
-            Toast.makeText(getApplicationContext(), "无数据", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "No record is found", Toast.LENGTH_SHORT).show();
         } else {
-            //查有数据则显示列表
+            //If there is data, display the list
             listView.setVisibility(View.VISIBLE);
             while (cursor.moveToNext()) {
 
@@ -110,7 +108,7 @@ public class SearchRecordActivity extends AppCompatActivity {
                 map.put("state", state);
                 list.add(map);
             }
-            //创建SimpleAdapter
+            //Create SimpleAdapter
             SimpleAdapter simpleAdapter = new SimpleAdapter(getApplicationContext(),
                     list,
                     R.layout.record_item_layout,
@@ -119,12 +117,10 @@ public class SearchRecordActivity extends AppCompatActivity {
             listView.setAdapter(simpleAdapter);
 
         }
-        cursor.close();
     }
 
-    //时间和类别spinner点击事件
+    //Time and category spinner click event
     private void initClick() {
-        //时间事件
         spin_date.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -135,7 +131,7 @@ public class SearchRecordActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        //类别事件
+
         spin_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -161,15 +157,15 @@ public class SearchRecordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search_record);
         tv_show=findViewById(R.id.tv_show);
         try {
-            //打开数据库，如果是第一次会创建该数据库，模式为MODE_PRIVATE
+            //Open database. If first time, create in MODE_PRIVATE mode
             sqLiteDatabase = openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE, null);
-            //执行创建表的sql语句，虽然每次都调用，但只有首次才创建表
+            //Although it is called every time, the table is only created once
 
-            //执行查询
-            listView = findViewById(R.id.searchlistview);//绑定列表
+            //Execute query
+            listView = findViewById(R.id.searchlistview);
             selectData();
         } catch (SQLException e) {
-            Toast.makeText(this, "数据库异常!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
 

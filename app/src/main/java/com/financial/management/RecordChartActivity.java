@@ -1,11 +1,18 @@
 package com.financial.management;
 
 
+import static java.security.AccessController.getContext;
+
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,8 +50,8 @@ public class RecordChartActivity extends AppCompatActivity {
         try {
             //打开数据库，如果是第一次会创建该数据库，模式为MODE_PRIVATE
             sqLiteDatabase = openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE, null);
-            String sql1 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  '收入'"  + " GROUP BY date" ;
-            String sql2 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  '支出'"  + " GROUP BY date" ;
+            String sql1 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Income'"  + " GROUP BY date" ;
+            String sql2 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Expense'"  + " GROUP BY date" ;
 
             List<BarEntry> entries = new ArrayList<>();
             cursor = sqLiteDatabase.rawQuery(sql1, null);
@@ -52,7 +59,7 @@ public class RecordChartActivity extends AppCompatActivity {
             if (cursor.getCount() == 0) {
                 //查无数据则怒不显示列表
                 // listView.setVisibility(View.GONE);
-                Toast.makeText(getApplicationContext(), "无数据", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "No available record", Toast.LENGTH_SHORT).show();
             }else{
                 List<String> dates = new ArrayList<>();
                 while (cursor.moveToNext()) {
@@ -64,12 +71,18 @@ public class RecordChartActivity extends AppCompatActivity {
                     System.out.println(dates.get(j));
                 }
                 System.out.println(entries.size());
-                BarDataSet dataSet = new BarDataSet(entries, "Money"); // add entries to dataset
+                BarDataSet dataSet = new BarDataSet(entries, "hkd"); // add entries to dataset
                 BarData barData = new BarData(dataSet);
                 barChart1.setData(barData);
-                barChart1.setDrawGridBackground(false);
-                barChart1.getDescription().setText("Daily income statistics");
-                barChart1.getDescription().setPosition(900,100);                barChart1.getDescription().setTextSize(12);
+                barChart1.getDescription().setText("");
+
+                // Set custom center-aligned title
+                TextView chartTitle = new TextView(this);
+                chartTitle.setText("Total income statistics");
+                chartTitle.setTextSize(14);
+                chartTitle.setTextColor(Color.BLUE);
+                barChart1.addView(chartTitle);
+
                 XAxis xAxis = barChart1.getXAxis();
                 xAxis.setGranularity(1);
                 xAxis.setLabelCount(dates.size());
@@ -81,6 +94,7 @@ public class RecordChartActivity extends AppCompatActivity {
                         return dates.get((int) value);
                     }
                 });
+
                 barChart1.invalidate(); // refresh
             }
 
@@ -90,7 +104,7 @@ public class RecordChartActivity extends AppCompatActivity {
             if (cursor.getCount() == 0) {
                 //查无数据则怒不显示列表
                 // listView.setVisibility(View.GONE);
-                Toast.makeText(getApplicationContext(), "无数据", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "No available record", Toast.LENGTH_SHORT).show();
             }else{
                 List<String> dates = new ArrayList<>();
                 while (cursor.moveToNext()) {
@@ -99,12 +113,17 @@ public class RecordChartActivity extends AppCompatActivity {
                     i++;
                 }
 
-                BarDataSet dataSet = new BarDataSet(entries, "Money"); // add entries to dataset
+                BarDataSet dataSet = new BarDataSet(entries, "hkd"); // add entries to dataset
                 BarData barData = new BarData(dataSet);
                 barChart2.setData(barData);
-                barChart2.getDescription().setText("Daily expenditure statistics");
-                barChart2.getDescription().setPosition(900,100);
-                barChart2.getDescription().setTextSize(12);
+                barChart2.getDescription().setText("");
+
+                TextView chartTitle = new TextView(this);
+                chartTitle.setText("Total expenditure statistics");
+                chartTitle.setTextSize(14);
+                chartTitle.setTextColor(Color.BLUE);
+                barChart2.addView(chartTitle);
+
                 XAxis xAxis = barChart2.getXAxis();
                 xAxis.setGranularity(1);
                 xAxis.setLabelCount(dates.size());
@@ -122,7 +141,7 @@ public class RecordChartActivity extends AppCompatActivity {
 
 
         } catch (SQLException e) {
-            Toast.makeText(this, "数据库异常!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         } finally {
             if (cursor != null) {

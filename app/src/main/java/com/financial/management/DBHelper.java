@@ -14,7 +14,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_USERPWD = "upwd";
 
 
-    //创建数据库语句
+    //Create database
     private static final String CREATE_TABLE = "create table if not exists "
             + TABLE_NAME + "(" + COLUMN_USERID + " text not null primary key,"
             + COLUMN_USERPWD + " text not null)";
@@ -23,7 +23,6 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, 1);
     }
 
-    //创建数据库方法
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
@@ -35,14 +34,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    //重置数据库方法(先删表，再建表)
+    //Reset database(delete table first, then recreate table)
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop table  if exists " + TABLE_NAME);
         db.execSQL(CREATE_TABLE);
     }
 
-    //登录方法
+    //User login
     public User userlogin(String userId, String userPwd) {
         User user = null;
         SQLiteDatabase db = getReadableDatabase();
@@ -63,7 +62,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return user;
     }
 
-    //注册方法
+    //User register
     public long registerUser(User user) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
