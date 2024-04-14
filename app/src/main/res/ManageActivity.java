@@ -35,19 +35,18 @@ public class ManageActivity extends AppCompatActivity {
     private static final String COLUMN_MONEY = "money";
     private static final String COLUMN_STATE = "state";
 
-    //创建表
+    //Create table
     private static final String CREATE_TABLE = "create table if not exists " + TABLE_NAME
             + "(" + COLUMN_ID + " integer primary key autoincrement," + COLUMN_DATE + " text," + COLUMN_TYPE
             + " text," + COLUMN_MONEY + " float," + COLUMN_STATE + " text)";
 
-    //自定义的查询方法
+    //Custom query method
     private void selectData() {
-        //遍历整个表
         String sql = "select * from " + TABLE_NAME ;
-        //把查询数据封装到Cursor
+        //Encapsulate query data into Cursor
         Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
         ArrayList<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        //用while循环遍历Cursor，再把它分别放到map中，最后统一存入list中，便于调用
+        //Loop through the Cursor, then put it into the map respectively, store it in list for convinence
         while (cursor.moveToNext()) {
 
             int id = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
@@ -65,16 +64,16 @@ public class ManageActivity extends AppCompatActivity {
             list.add(map);
         }
 
-        //创建SimpleAdapter
+        //Create SimpleAdapter
         SimpleAdapter simpleAdapter = new SimpleAdapter(getApplicationContext(),
                 list,
                 R.layout.record_item_layout,
                 new String[]{"id", "date", "type", "money", "state"},
                 new int[]{R.id.list_id, R.id.list_date, R.id.list_type, R.id.list_money, R.id.list_state});
         final ListView listView = findViewById(R.id.recordlistview);
-        //绑定适配器
+        //Binding adapter
         listView.setAdapter(simpleAdapter);
-        //设置ListView单击事件
+        //Set ListView click event
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -112,10 +111,10 @@ public class ManageActivity extends AppCompatActivity {
         try {
             sqLiteDatabase = openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE, null);
             sqLiteDatabase.execSQL(CREATE_TABLE);
-            //执行查询
+            //Execute query
             selectData();
         } catch (SQLException e) {
-            Toast.makeText(this, "数据库异常!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
         tv_test = findViewById(R.id.tv_test);
@@ -124,13 +123,13 @@ public class ManageActivity extends AppCompatActivity {
         edt_money = findViewById(R.id.edt_money);
         edt_state = findViewById(R.id.edt_state);
 
-        //新增按键
+        //Button for creation
         Button btn_add = findViewById(R.id.btn_add);
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (edt_date.getText().toString().equals("") | edt_type.getText().toString().equals("") | edt_money.getText().toString().equals("") | edt_state.getText().toString().equals("")) {
-                    Toast.makeText(ManageActivity.this, "数据不能为空!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ManageActivity.this, "Data cannot be empty!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -138,16 +137,16 @@ public class ManageActivity extends AppCompatActivity {
                 String type = edt_type.getText().toString();
                 String money = edt_money.getText().toString();
                 String state = edt_state.getText().toString();
-                //定义添加数据的sql语句
+
                 String sql = "insert into " + TABLE_NAME + "(" + COLUMN_DATE + "," + COLUMN_TYPE + "," + COLUMN_MONEY + "," + COLUMN_STATE + ") " +
                         "values('" + date + "','" + type + "','" + money + "','" + state + "')";
-                //执行sql语句
                 sqLiteDatabase.execSQL(sql);
-                Toast.makeText(getApplicationContext(), "新增数据成功!", Toast.LENGTH_LONG).show();
-                //刷新显示列表
+                Toast.makeText(getApplicationContext(), "Successfully insert data!", Toast.LENGTH_LONG).show();
+
+                //Refresh display list
                 selectData();
 
-                //消除数据
+                //Delete data
                 tv_test.setText("");
                 edt_date.setText("");
                 edt_type.setText("");
@@ -156,19 +155,19 @@ public class ManageActivity extends AppCompatActivity {
             }
         });
 
-        //修改按键
+        //Button for update
         Button btn_update = findViewById(R.id.btn_update);
         btn_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //无选择提示
+                //If nothing selected
                 if (selectId == -1) {
-                    Toast.makeText(getApplicationContext(), "请选择要修改的行!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please select the row you want to modify", Toast.LENGTH_LONG).show();
                     return;
                 }
-                //判断是否有空数据
+                //If selected data is empty
                 if (edt_date.getText().toString().equals("") | edt_type.getText().toString().equals("") | edt_money.getText().toString().equals("") | edt_state.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "数据不能为空!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Data can not be null!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -176,15 +175,15 @@ public class ManageActivity extends AppCompatActivity {
                 String type = edt_type.getText().toString();
                 String money = edt_money.getText().toString();
                 String state = edt_state.getText().toString();
-                //定义修改数据的sql语句
+
                 String sql = "update " + TABLE_NAME + " set " + COLUMN_DATE + "='" + date + "',type='" + type + "',money='" + money + "',state='" + state + "' where id=" + selectId;
-                //执行sql语句
                 sqLiteDatabase.execSQL(sql);
-                Toast.makeText(getApplicationContext(), "修改数据成功!", Toast.LENGTH_LONG).show();
-                //刷新显示列表
+                Toast.makeText(getApplicationContext(), "Successfuly modify the data!", Toast.LENGTH_LONG).show();
+
+                //Refresh display list
                 selectData();
                 selectId = -1;
-                //消除数据
+                //delte data
                 tv_test.setText("");
                 edt_date.setText("");
                 edt_type.setText("");
@@ -192,39 +191,38 @@ public class ManageActivity extends AppCompatActivity {
                 edt_state.setText("");
             }
         });
-        //删除按键
+
+        //Button for deletion
         Button btn_delete = findViewById(R.id.btn_delete);
         btn_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //无选择提示
                 if (selectId == -1) {
-                    Toast.makeText(ManageActivity.this, "请选择要删除的行!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ManageActivity.this, "Please select the row you want to delete", Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                //定义删除对话框
-                AlertDialog dialog = new AlertDialog.Builder(ManageActivity.this).setTitle("删除操作")
-                        .setMessage("确定删除？此操作不可逆，请慎重选择！")
-                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                //Define delete dialog
+                AlertDialog dialog = new AlertDialog.Builder(ManageActivity.this).setTitle("Delete action")
+                        .setMessage("This operation is irreversible, please choose carefully")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //定义删除的sql语句
+
                                 String sql = "delete from " + TABLE_NAME + " where id=" + selectId;
-                                //执行sql语句
                                 sqLiteDatabase.execSQL(sql);
-                                //刷新显示列表
-                                Toast.makeText(getApplicationContext(), "删除数据成功!", Toast.LENGTH_LONG).show();
+
+                                Toast.makeText(getApplicationContext(), "Successfully delete the data!", Toast.LENGTH_LONG).show();
                                 selectData();
                                 selectId = -1;
-                                //清除数据
+
                                 tv_test.setText("");
                                 edt_date.setText("");
                                 edt_type.setText("");
                                 edt_money.setText("");
                                 edt_state.setText("");
                             }
-                        }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
