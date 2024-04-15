@@ -154,14 +154,14 @@ public class ManageActivity extends AppCompatActivity {
         spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // 获取选中项的文本
+                // Get selected text
                 String selectedItem = parent.getItemAtPosition(position).toString();
-                // 更新 TextView 显示
+                // Update TextView
                 edt_type.setText(selectedItem);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                edt_type.setText(""); // 如果没有选中任何项
+                edt_type.setText("");
             }
         });
 
@@ -258,15 +258,15 @@ public class ManageActivity extends AppCompatActivity {
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //定义删除的sql语句
+
                                 String sql = "delete from " + TABLE_NAME + " where id=" + selectId;
-                                //执行sql语句
                                 sqLiteDatabase.execSQL(sql);
-                                //刷新显示列表
+
                                 Toast.makeText(getApplicationContext(), "Data Deleted Successfully!", Toast.LENGTH_LONG).show();
                                 selectData();
                                 selectId = -1;
-                                //清除数据
+
+                                //Delete data
                                 tv_test.setText("");
                                 edt_date.setText("");
                                 edt_type.setText("");

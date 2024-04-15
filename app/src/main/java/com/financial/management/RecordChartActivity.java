@@ -69,23 +69,6 @@ public class RecordChartActivity extends AppCompatActivity {
             entries = new ArrayList<>();
             createBarchart(sql2, barChart2, entries, "Total Expense statistic");
 
-//            yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//                @Override
-//                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                    String selectedYear = (String) parent.getItemAtPosition(position);
-//                    if(!Objects.equals(selectedYear, "")){
-//                        System.out.println("Selected Year: " + selectedYear);
-//                        String sql = "SELECT " + COLUMN_DATE + ", SUM(money) AS SUM FROM " + TABLE_NAME + " WHERE " + COLUMN_DATE + " LIKE '%"+selectedYear+"%' GROUP BY " + COLUMN_DATE;
-//                        entries = new ArrayList<>();
-//                        createBarchart(sql, barChart1, entries, "Total Income statistic");
-//                    }
-//                }
-//
-//                @Override
-//                public void onNothingSelected(AdapterView<?> parent) {
-//                }
-//            });
-
 
         } catch (SQLException e) {
             Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();

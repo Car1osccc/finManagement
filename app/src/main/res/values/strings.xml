@@ -2,6 +2,6 @@
     <string name="app_name">HKU Finance</string>
     <string-array name="type_options">
         <item>Income</item>
-        <item>Outcome</item>
+        <item>Expense</item>
     </string-array>
 </resources>

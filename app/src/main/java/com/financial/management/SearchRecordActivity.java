@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-//Income and Outcome Record Search
+//Income and Expense Record Search
 public class SearchRecordActivity extends AppCompatActivity {
-    private String[] type_data = {"", "Income", "Outcome"};
+    private String[] type_data = {"", "Income", "Expense"};
     Spinner spin_date, spin_type;
     ListView listView;
     TextView tv_show;
@@ -49,7 +49,7 @@ public class SearchRecordActivity extends AppCompatActivity {
         } else if (!TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "'";
             //If no query time but has query type, query the specified content
-        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {//如果没有查询时间，有查询类型
+        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where type='" + selectType+"'";
         } else {
             sql ="select * from " + TABLE_NAME + " where date='" + selectDate + "' and type='" + selectType+"'";
@@ -154,7 +154,7 @@ public class SearchRecordActivity extends AppCompatActivity {
             //Although it is called every time, the table is only created once
 
             //Execute query
-            listView = findViewById(R.id.searchlistview);//绑定列表
+            listView = findViewById(R.id.searchlistview);
             selectData();
         } catch (SQLException e) {
             Toast.makeText(this, "Database Exception", Toast.LENGTH_LONG).show();
