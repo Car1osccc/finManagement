@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 
-//Login page logic
+//登录页面逻辑
 public class MainActivity extends AppCompatActivity {
     EditText edt_id,edt_pwd;
     @Override
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         edt_id = findViewById(R.id.edt_uid);
         edt_pwd =findViewById(R.id.edt_upwd);
         Button btn_login = findViewById(R.id.btn_login);
-        //Button for login
+        //登录按键
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -32,9 +32,9 @@ public class MainActivity extends AppCompatActivity {
                     DBHelper dbuserHelper=new DBHelper(getApplicationContext());
                     User user = dbuserHelper.userlogin(userId,userPwd);
 
-                    //If login successful, jump to the corresponding type interface
+                    //登录成功跳转对应类型界面
                     if(user!=null) {
-                        Toast.makeText(getApplicationContext(), user.getUserId() + "Successfully login", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), user.getUserId() + "登录成功", Toast.LENGTH_SHORT).show();
                         Intent intent;
                         ArrayList<User> list = new ArrayList<>();
                         list.add(user);
@@ -43,15 +43,15 @@ public class MainActivity extends AppCompatActivity {
                         intent.putParcelableArrayListExtra("LoginUser", list);
                         startActivity(intent);
                     }else{
-                        Toast.makeText(getApplicationContext(),"Login failed, password is wrong or account does not exist！",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"登录失败，密码错误或账号不存在！",Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),"Database exception",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"数据库异常",Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        //Button for registration
+        //注册按键
         Button btn_register=findViewById(R.id.btn_register);
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override

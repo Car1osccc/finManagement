@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
-//Registration page logic
+//Registration page
 public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +20,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         final EditText edt_rid =findViewById(R.id.edt_rid);
         final EditText edt_rpwd =findViewById(R.id.edt_rpwd);
-
+        //注册按键
         Button btn_registerf=findViewById(R.id.btn_registeruser);
         btn_registerf.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -31,7 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 DBHelper dbUserHelper = new DBHelper(getApplicationContext());
                 if (dbUserHelper.registerUser(user) > 0) {
-                    Toast.makeText(getApplicationContext(), "Registration success", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Registered Successfully", Toast.LENGTH_SHORT).show();
                     Intent intent;
                     ArrayList<User> list = new ArrayList<>();
                     list.add(user);
@@ -40,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
                     startActivity(intent);
 
                 }else{
-                    Toast.makeText(getApplicationContext(), "You have already registered this account, please return to login page", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "This Account has been Registered. Return to Login!", Toast.LENGTH_SHORT).show();
                 }
             }
         });

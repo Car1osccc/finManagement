@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">final</string>
+    <string name="app_name">HKU Finance</string>
+    <string-array name="type_options">
+        <item>Income</item>
+        <item>Outcome</item>
+    </string-array>
 </resources>

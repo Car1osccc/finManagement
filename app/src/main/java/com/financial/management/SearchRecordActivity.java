@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -21,15 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-//Income and expenditure record business logic
+//Income and Outcome Record Search
 public class SearchRecordActivity extends AppCompatActivity {
-    private String[] date_data= {"", "202101", "202102", "202103", "202104", "202105","202106","202107","202108","202109","202110","202111","202112"};
-    private String[] type_data = {"", "Income", "Expense"};
+    private String[] type_data = {"", "Income", "Outcome"};
     Spinner spin_date, spin_type;
     ListView listView;
     TextView tv_show;
     float sum=0;
-
+    //数据库
     private String selectDate, selectType;
     private static final String DATABASE_NAME = "Test.db";
     private static final String TABLE_NAME = "record";
@@ -49,7 +49,7 @@ public class SearchRecordActivity extends AppCompatActivity {
         } else if (!TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "'";
             //If no query time but has query type, query the specified content
-        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {
+        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {//如果没有查询时间，有查询类型
             sql = "select * from " + TABLE_NAME + " where type='" + selectType+"'";
         } else {
             sql ="select * from " + TABLE_NAME + " where date='" + selectDate + "' and type='" + selectType+"'";
@@ -77,7 +77,7 @@ public class SearchRecordActivity extends AppCompatActivity {
         } else if (!TextUtils.isEmpty(selectDate) && TextUtils.isEmpty(selectType)) {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "'";
             //If no query time but has query type, select the specified content
-        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {
+        } else if (TextUtils.isEmpty(selectDate) && !TextUtils.isEmpty(selectType)) {//如果没有查询时间，有查询类型
             sql = "select * from " + TABLE_NAME + " where type='" + selectType+"'";
         } else {
             sql = "select * from " + TABLE_NAME + " where date='" + selectDate + "' and type='" + selectType+"'";
@@ -89,7 +89,7 @@ public class SearchRecordActivity extends AppCompatActivity {
         if (cursor.getCount() == 0) {
             //If no data is found, the list will not be displayed
             // listView.setVisibility(View.GONE);
-            Toast.makeText(getApplicationContext(), "No record is found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "N/A", Toast.LENGTH_SHORT).show();
         } else {
             //If there is data, display the list
             listView.setVisibility(View.VISIBLE);
@@ -117,21 +117,11 @@ public class SearchRecordActivity extends AppCompatActivity {
             listView.setAdapter(simpleAdapter);
 
         }
+        cursor.close();
     }
 
     //Time and category spinner click event
     private void initClick() {
-        spin_date.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectDate = date_data[position];
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
         spin_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -146,6 +136,8 @@ public class SearchRecordActivity extends AppCompatActivity {
         findViewById(R.id.btn_search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                EditText edt_date = findViewById(R.id.edt_date);
+                selectDate = edt_date.getText().toString();
                 selectData();
             }
         });
@@ -162,22 +154,16 @@ public class SearchRecordActivity extends AppCompatActivity {
             //Although it is called every time, the table is only created once
 
             //Execute query
-            listView = findViewById(R.id.searchlistview);
+            listView = findViewById(R.id.searchlistview);//绑定列表
             selectData();
         } catch (SQLException e) {
-            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Database Exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
 
-        ArrayAdapter<String> adapter = new
-                ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, date_data);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spin_date = findViewById(R.id.spin_date);
-        spin_date.setAdapter(adapter);
-
         ArrayAdapter<String> adapter1 = new
                 ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spin_type = findViewById(R.id.spin_type);
         spin_type.setAdapter(adapter1);
         initClick();

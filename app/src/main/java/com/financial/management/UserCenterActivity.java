@@ -26,7 +26,7 @@ public class UserCenterActivity extends AppCompatActivity {
         User user=list.get(0);
         final String username=user.getUserId();
         TextView tv_welcome=findViewById(R.id.tv_welcome);
-        tv_welcome.setText("Welcome, "+username);
+        tv_welcome.setText("Welcome, "+username+"!");
 
         //Income and Expenses Managment
         ImageView btn_recordmanage =findViewById(R.id.btn_recordmanage);
@@ -60,15 +60,15 @@ public class UserCenterActivity extends AppCompatActivity {
         btn_exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog dialog = new AlertDialog.Builder(UserCenterActivity.this).setTitle("Logout action")
-                        .setMessage("Are you sure you want to quit？")
+                AlertDialog dialog = new AlertDialog.Builder(UserCenterActivity.this).setTitle("Logging Out")
+                        .setMessage("You'll have to re-login if you want to access your financial data.")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent=new Intent(getApplicationContext(), MainActivity.class);
                                 startActivity(intent);
                             }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        }).setNegativeButton("Return", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 

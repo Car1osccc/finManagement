@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
+//用户个人中心页面逻辑
 public class UserCenterActivity extends AppCompatActivity {
     ArrayList<User> list;
 
@@ -26,9 +27,9 @@ public class UserCenterActivity extends AppCompatActivity {
         User user=list.get(0);
         final String username=user.getUserId();
         TextView tv_welcome=findViewById(R.id.tv_welcome);
-        tv_welcome.setText("Welcome, "+username);
+        tv_welcome.setText("欢迎您 ,用户"+username);
 
-        //Income and Expenses Managment
+        //收支管理
         ImageView btn_recordmanage =findViewById(R.id.btn_recordmanage);
         btn_recordmanage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,7 +38,7 @@ public class UserCenterActivity extends AppCompatActivity {
                 startActivity(intent1);
             }
         });
-        //Income and Expenses Query
+        //收支查询
         ImageView btn_searchrecord=findViewById(R.id.btn_searchrecord);
         btn_searchrecord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,7 +47,7 @@ public class UserCenterActivity extends AppCompatActivity {
                 startActivity(intent2);
             }
         });
-        //Income and Expenses Statistics
+        //收支统计
         ImageView btn_calcmoney=findViewById(R.id.btn_calcmoney);
         btn_calcmoney.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,20 +56,20 @@ public class UserCenterActivity extends AppCompatActivity {
                 startActivity(intent3);
             }
         });
-        //Logout button
+        //退出按键
         ImageView btn_exit=findViewById(R.id.btn_exit);
         btn_exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog dialog = new AlertDialog.Builder(UserCenterActivity.this).setTitle("Logout action")
-                        .setMessage("Are you sure you want to quit？")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                AlertDialog dialog = new AlertDialog.Builder(UserCenterActivity.this).setTitle("退出操作")
+                        .setMessage("确定退出，不继续玩玩？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent=new Intent(getApplicationContext(), MainActivity.class);
                                 startActivity(intent);
                             }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        }).setNegativeButton("继续留下！", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 

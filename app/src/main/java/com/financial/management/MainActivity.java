@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 
-//Login page logic
+//Login page
 public class MainActivity extends AppCompatActivity {
     EditText edt_id,edt_pwd;
     @Override
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //If login successful, jump to the corresponding type interface
                     if(user!=null) {
-                        Toast.makeText(getApplicationContext(), user.getUserId() + "Successfully login", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), user.getUserId() + " Logged In Successfully", Toast.LENGTH_SHORT).show();
                         Intent intent;
                         ArrayList<User> list = new ArrayList<>();
                         list.add(user);
@@ -43,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
                         intent.putParcelableArrayListExtra("LoginUser", list);
                         startActivity(intent);
                     }else{
-                        Toast.makeText(getApplicationContext(),"Login failed, password is wrong or account does not exist！",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"Login Failed! Wrong Password or Non-existing Account!",Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),"Database exception",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"Database Exception",Toast.LENGTH_SHORT).show();
                 }
             }
         });

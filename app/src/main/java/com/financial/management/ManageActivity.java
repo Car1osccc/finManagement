@@ -1,6 +1,7 @@
 package com.financial.management;
 
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +18,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
+import android.widget.DatePicker;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +47,7 @@ public class ManageActivity extends AppCompatActivity {
             + "(" + COLUMN_ID + " integer primary key autoincrement," + COLUMN_DATE + " text," + COLUMN_TYPE
             + " text," + COLUMN_MONEY + " float," + COLUMN_STATE + " text)";
 
-    //Custom query method
+    //Customized query method
     private void selectData() {
         String sql = "select * from " + TABLE_NAME ;
         //Encapsulate query data into Cursor
@@ -104,6 +111,23 @@ public class ManageActivity extends AppCompatActivity {
         });
     }
 
+    private void showDatePicker() {
+        // Use the current date as the default date in the picker
+        final Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year1, monthOfYear, dayOfMonth) -> {
+                    // Format the date as you need, ensuring month is two digits
+                    String formattedMonth = String.format("%02d", monthOfYear + 1); // +1 because Calendar month is zero-based
+                    String date = year1 + formattedMonth;
+                    edt_date.setText(date); // Assuming you have edt_date as a TextView now
+                }, year, month, day);
+        datePickerDialog.show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,14 +138,41 @@ public class ManageActivity extends AppCompatActivity {
             //Execute query
             selectData();
         } catch (SQLException e) {
-            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Database Exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
+
         tv_test = findViewById(R.id.tv_test);
         edt_date = findViewById(R.id.edt_date);
         edt_type = findViewById(R.id.edt_type);
+        edt_type.setVisibility(View.GONE);
         edt_money = findViewById(R.id.edt_money);
         edt_state = findViewById(R.id.edt_state);
+
+        Button btnPickDate = findViewById(R.id.btn_datePicker);
+        Spinner spinnerType = findViewById(R.id.spinner_type);
+        spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // 获取选中项的文本
+                String selectedItem = parent.getItemAtPosition(position).toString();
+                // 更新 TextView 显示
+                edt_type.setText(selectedItem);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                edt_type.setText(""); // 如果没有选中任何项
+            }
+        });
+
+        // Initialize spinner with type choices
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.type_options, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerType.setAdapter(adapter);
+
+        // Date Picker Dialog
+        btnPickDate.setOnClickListener(v -> showDatePicker());
 
         //Button for creation
         Button btn_add = findViewById(R.id.btn_add);
@@ -129,7 +180,7 @@ public class ManageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (edt_date.getText().toString().equals("") | edt_type.getText().toString().equals("") | edt_money.getText().toString().equals("") | edt_state.getText().toString().equals("")) {
-                    Toast.makeText(ManageActivity.this, "Data cannot be empty!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ManageActivity.this, "Data can't be NULL!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -141,7 +192,7 @@ public class ManageActivity extends AppCompatActivity {
                 String sql = "insert into " + TABLE_NAME + "(" + COLUMN_DATE + "," + COLUMN_TYPE + "," + COLUMN_MONEY + "," + COLUMN_STATE + ") " +
                         "values('" + date + "','" + type + "','" + money + "','" + state + "')";
                 sqLiteDatabase.execSQL(sql);
-                Toast.makeText(getApplicationContext(), "Successfully insert data!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Data Added Successfully!", Toast.LENGTH_LONG).show();
 
                 //Refresh display list
                 selectData();
@@ -162,12 +213,12 @@ public class ManageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //If nothing selected
                 if (selectId == -1) {
-                    Toast.makeText(getApplicationContext(), "Please select the row you want to modify", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Select the Row to Edit!", Toast.LENGTH_LONG).show();
                     return;
                 }
                 //If selected data is empty
                 if (edt_date.getText().toString().equals("") | edt_type.getText().toString().equals("") | edt_money.getText().toString().equals("") | edt_state.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Data can not be null!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Data Can't be NULL!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -178,12 +229,11 @@ public class ManageActivity extends AppCompatActivity {
 
                 String sql = "update " + TABLE_NAME + " set " + COLUMN_DATE + "='" + date + "',type='" + type + "',money='" + money + "',state='" + state + "' where id=" + selectId;
                 sqLiteDatabase.execSQL(sql);
-                Toast.makeText(getApplicationContext(), "Successfuly modify the data!", Toast.LENGTH_LONG).show();
-
+                Toast.makeText(getApplicationContext(), "Data Edited Successfully!", Toast.LENGTH_LONG).show();
                 //Refresh display list
                 selectData();
                 selectId = -1;
-                //delte data
+                //Delete data
                 tv_test.setText("");
                 edt_date.setText("");
                 edt_type.setText("");
@@ -198,24 +248,25 @@ public class ManageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (selectId == -1) {
-                    Toast.makeText(ManageActivity.this, "Please select the row you want to delete", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ManageActivity.this, "Select the Row to Delete!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 //Define delete dialog
-                AlertDialog dialog = new AlertDialog.Builder(ManageActivity.this).setTitle("Delete action")
-                        .setMessage("This operation is irreversible, please choose carefully")
+                AlertDialog dialog = new AlertDialog.Builder(ManageActivity.this).setTitle("Delete Alert")
+                        .setMessage("Are You Sure to Delete?")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
+                                //定义删除的sql语句
                                 String sql = "delete from " + TABLE_NAME + " where id=" + selectId;
+                                //执行sql语句
                                 sqLiteDatabase.execSQL(sql);
-
-                                Toast.makeText(getApplicationContext(), "Successfully delete the data!", Toast.LENGTH_LONG).show();
+                                //刷新显示列表
+                                Toast.makeText(getApplicationContext(), "Data Deleted Successfully!", Toast.LENGTH_LONG).show();
                                 selectData();
                                 selectId = -1;
-
+                                //清除数据
                                 tv_test.setText("");
                                 edt_date.setText("");
                                 edt_type.setText("");
