@@ -88,7 +88,7 @@ public class SearchRecordActivity extends AppCompatActivity {
         ArrayList<Map<String, String>> list = new ArrayList<Map<String, String>>();
         if (cursor.getCount() == 0) {
             //If no data is found, the list will not be displayed
-            // listView.setVisibility(View.GONE);
+            listView.setVisibility(View.GONE);
             Toast.makeText(getApplicationContext(), "N/A", Toast.LENGTH_SHORT).show();
         } else {
             //If there is data, display the list
