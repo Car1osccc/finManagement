@@ -151,6 +151,7 @@ public class ManageActivity extends AppCompatActivity {
 
         Button btnPickDate = findViewById(R.id.btn_datePicker);
         Spinner spinnerType = findViewById(R.id.spinner_type);
+        spinnerType.setSelection(0);
         spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
