@@ -62,12 +62,9 @@ public class RecordChartActivity extends AppCompatActivity {
 
             setupYearSpinner(yearSpinner,pieChart,incomeBarChart,expenseBarChart);
 
-            String sql1 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Income'"  + " GROUP BY date" ;
-            String sql2 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Expense'"  + " GROUP BY date" ;
-
             createPieChart(pieEntries, pieChart, null);
-            createBarchart(sql1, null, incomeBarChart, incomeEntries, "Total Income statistic");
-            createBarchart(sql2, null, expenseBarChart, expenseEntries, "Total Expense statistic");
+            createBarchart("Income", null, incomeBarChart, incomeEntries, "Total Income statistic");
+            createBarchart("Expense", null, expenseBarChart, expenseEntries, "Total Expense statistic");
 
 
         } catch (SQLException e) {
@@ -84,15 +81,9 @@ public class RecordChartActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedYear = (String) parent.getItemAtPosition(position);
                 createPieChart(pieEntries,pieChart,selectedYear);
+                createBarchart("Income", selectedYear, incomeBarChart, incomeEntries, "Total Income statistic");
+                createBarchart("Expense", selectedYear, expenseBarChart, expenseEntries, "Total Expense statistic");
 
-//                if(!Objects.equals(selectedYear, "All")){
-//                    String sql = "SELECT date, SUM(money) AS SUM " +
-//                            "FROM " + TABLE_NAME +
-//                            " WHERE type = 'Income' AND date LIKE ? " +
-//                            "GROUP BY date";
-//
-//                    createBarchart(sql, selectedYear, incomeBarChart, incomeEntries, "Total Income statistic");
-//                }
             }
 
             @Override
@@ -147,79 +138,120 @@ public class RecordChartActivity extends AppCompatActivity {
     }
     
     @SuppressLint("Range")
-    private void createBarchart(String sql, @Nullable String selectedYear, BarChart barChart, List<BarEntry> entries, String title){
+    private void createBarchart(String type, @Nullable String selectedYear, BarChart barChart, List<BarEntry> entries, String title){
         entries.clear();
         barChart.clear();
+        boolean isYearSelected = selectedYear!=null & !Objects.equals(selectedYear, "All");
 
-        Cursor cursor = null;
-        if(selectedYear==null || selectedYear.equals("All")){
-            cursor = sqLiteDatabase.rawQuery(sql, null);
-        }else{
-            cursor = sqLiteDatabase.rawQuery(sql,  new String[]{selectedYear + "%"});
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT date, SUM(money) AS SUM FROM ").append(TABLE_NAME).append(" WHERE type = ?");
+        ArrayList<String> args = new ArrayList<>();
+        args.add(type);
+        System.out.println(selectedYear);
+
+        if (isYearSelected) {
+            sqlBuilder.append(" AND date LIKE ?");
+            args.add(selectedYear + "%");
         }
+        sqlBuilder.append(" GROUP BY date");
 
         int i = 0;
-        if (cursor.getCount() == 0) {
-            // listView.setVisibility(View.GONE);
-            Toast.makeText(getApplicationContext(), "No available record", Toast.LENGTH_SHORT).show();
-        }else{
-            List<String> dates = new ArrayList<>();
-            while (cursor.moveToNext()) {
-                dates.add(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
-                entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM")), cursor.getString(cursor.getColumnIndex(COLUMN_DATE))));
-                i++;
+        Cursor cursor = null;
+        try {
+            cursor = sqLiteDatabase.rawQuery(sqlBuilder.toString(), args.toArray(new String[0]));
+            if (cursor.getCount() == 0) {
+                // listView.setVisibility(View.GONE);
+                Toast.makeText(getApplicationContext(), "No available record", Toast.LENGTH_SHORT).show();
+            } else {
+                List<String> dates = new ArrayList<>();
+                while (cursor.moveToNext()) {
+                    dates.add(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
+                    entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM")), cursor.getString(cursor.getColumnIndex(COLUMN_DATE))));
+                    i++;
+                }
+
+                BarDataSet dataSet = new BarDataSet(entries, "hkd"); // add entries to dataset
+                BarData barData = new BarData(dataSet);
+                barChart.setData(barData);
+                barChart.getDescription().setText("");
+
+                // Set custom center-aligned title
+                TextView chartTitle = new TextView(this);
+                chartTitle.setText(title);
+                chartTitle.setTextSize(14);
+                chartTitle.setTextColor(Color.BLUE);
+                barChart.addView(chartTitle);
+
+                XAxis xAxis = barChart.getXAxis();
+                xAxis.setGranularity(1);
+                xAxis.setLabelCount(dates.size());
+                xAxis.setDrawGridLines(false);
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+//                xAxis.setValueFormatter(new ValueFormatter() {
+//                    @Override
+//                    public String getFormattedValue(float value) {
+//                        return dates.get((int) value);
+//                    }
+//                });
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        int index = (int) value;
+                        if (index >= 0 && index < dates.size()) {
+                            String dateString = dates.get(index);
+                            String year = dateString.substring(0, 4);
+                            String month = dateString.substring(4);
+                            String formattedDate = "";
+                            if (isYearSelected) {
+                                formattedDate = getMonthName(Integer.parseInt(month));
+                            } else{
+                                formattedDate = getMonthName(Integer.parseInt(month))+" "+year;
+                            }
+                            return formattedDate;
+                        } else {
+                            return ""; // Return an empty string or handle the out-of-bounds case appropriately
+                        }
+                    }
+                });
+
+
+                YAxis yAxis = barChart.getAxisLeft();
+                yAxis.setGranularity(1);
+                yAxis.setDrawGridLines(false);
+                yAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
+                yAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        int intValue = (int) value;
+                        return String.valueOf(intValue);
+                    }
+                });
+
+                YAxis y2Axis = barChart.getAxisRight();
+                y2Axis.setGranularity(1);
+                y2Axis.setDrawGridLines(false);
+                y2Axis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
+                y2Axis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        int intValue = (int) value;
+                        return String.valueOf(intValue);
+                    }
+                });
             }
 
-            BarDataSet dataSet = new BarDataSet(entries, "hkd"); // add entries to dataset
-            BarData barData = new BarData(dataSet);
-            barChart.setData(barData);
-            barChart.getDescription().setText("");
 
-            // Set custom center-aligned title
-            TextView chartTitle = new TextView(this);
-            chartTitle.setText(title);
-            chartTitle.setTextSize(14);
-            chartTitle.setTextColor(Color.BLUE);
-            barChart.addView(chartTitle);
-
-            XAxis xAxis = barChart.getXAxis();
-            xAxis.setGranularity(1);
-            xAxis.setLabelCount(dates.size());
-            xAxis.setDrawGridLines(false);
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    return dates.get((int) value);
-                }
-            });
-
-            YAxis yAxis = barChart.getAxisLeft();
-            yAxis.setGranularity(1);
-            yAxis.setDrawGridLines(false);
-            yAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
-            yAxis.setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    int intValue = (int) value;
-                    return String.valueOf(intValue);
-                }
-            });
-
-            YAxis y2Axis = barChart.getAxisRight();
-            y2Axis.setGranularity(1);
-            y2Axis.setDrawGridLines(false);
-            y2Axis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
-            y2Axis.setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    int intValue = (int) value;
-                    return String.valueOf(intValue);
-                }
-            });
-
-            barChart.invalidate(); // refresh
+        } catch (SQLException e) {
+            Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
+
+
+        barChart.invalidate(); // refresh
     }
     
     @SuppressLint("Range")
@@ -267,6 +299,12 @@ public class RecordChartActivity extends AppCompatActivity {
         yearList.add("All");  // Default item
         yearList.addAll(yearSet);
         return yearList;
+    }
+
+    // Helper method to get the month name from the month number
+    private String getMonthName(int month) {
+        String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        return monthNames[month - 1];
     }
 
 }
