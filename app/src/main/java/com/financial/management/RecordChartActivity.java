@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -42,54 +43,73 @@ public class RecordChartActivity extends AppCompatActivity {
     private static final String COLUMN_DATE = "date";
 
     private SQLiteDatabase sqLiteDatabase = null;
-    private List<BarEntry> entries = new ArrayList<>();
+    private List<BarEntry> incomeEntries = new ArrayList<>();
+    private List<BarEntry> expenseEntries = new ArrayList<>();
     private List<PieEntry> pieEntries = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
-
         Spinner yearSpinner = findViewById(R.id.yearSpinner);
-        BarChart barChart1 = findViewById(R.id.barChart1);
-        BarChart barChart2 = findViewById(R.id.barChart2);
+        BarChart incomeBarChart = findViewById(R.id.barChart1);
+        BarChart expenseBarChart = findViewById(R.id.barChart2);
         PieChart pieChart = findViewById(R.id.pieChart);
-
         Cursor cursor = null;
         try {
             //If first create, set to MODE_PRIVATE
             sqLiteDatabase = openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE, null);
+
+            setupYearSpinner(yearSpinner,pieChart,incomeBarChart,expenseBarChart);
+
             String sql1 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Income'"  + " GROUP BY date" ;
             String sql2 = "select date, SUM(money) AS SUM from " + TABLE_NAME + " WHERE type =  'Expense'"  + " GROUP BY date" ;
 
-            addYearSelection(yearSpinner);
-
-            createPieChart(pieEntries, pieChart);
-            createBarchart(sql1, barChart1, entries, "Total Income statistic");
-            entries = new ArrayList<>();
-            createBarchart(sql2, barChart2, entries, "Total Expense statistic");
+            createPieChart(pieEntries, pieChart, null);
+            createBarchart(sql1, null, incomeBarChart, incomeEntries, "Total Income statistic");
+            createBarchart(sql2, null, expenseBarChart, expenseEntries, "Total Expense statistic");
 
 
         } catch (SQLException e) {
             Toast.makeText(this, "Database exception", Toast.LENGTH_LONG).show();
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+        } 
+    }
+    private void setupYearSpinner(Spinner yearSpinner, PieChart pieChart, BarChart incomeBarChart, BarChart expenseBarChart){
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, getYear(yearSpinner));
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        yearSpinner.setAdapter(adapter);
+        yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedYear = (String) parent.getItemAtPosition(position);
+                createPieChart(pieEntries,pieChart,selectedYear);
+
+//                if(!Objects.equals(selectedYear, "All")){
+//                    String sql = "SELECT date, SUM(money) AS SUM " +
+//                            "FROM " + TABLE_NAME +
+//                            " WHERE type = 'Income' AND date LIKE ? " +
+//                            "GROUP BY date";
+//
+//                    createBarchart(sql, selectedYear, incomeBarChart, incomeEntries, "Total Income statistic");
+//                }
             }
-        }
-    }
 
-    private void updateChart(String selectedYear) {
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
     }
-
-    private void createPieChart(List<PieEntry> pieEntries, PieChart pieChart) {
+    
+    private void createPieChart(List<PieEntry> pieEntries, PieChart pieChart, @Nullable String year) {
+        pieChart.clear();
+        pieEntries.clear();
         // Calculate total income and add it to the chart
-        float totalIncome = calculateTotal("Income");
+        float totalIncome = getTotalSum("Income",year);
         pieEntries.add(new PieEntry(totalIncome, "Income"));
 
         // Calculate total expenses and add it to the chart
-        float totalExpense = calculateTotal("Expense");
+        float totalExpense = getTotalSum("Expense",year);
         pieEntries.add(new PieEntry(totalExpense, "Expense"));
 
         PieDataSet pieDataSet = new PieDataSet(pieEntries,"");
@@ -125,28 +145,19 @@ public class RecordChartActivity extends AppCompatActivity {
 
         pieChart.invalidate(); // Refresh the chart
     }
+    
+    @SuppressLint("Range")
+    private void createBarchart(String sql, @Nullable String selectedYear, BarChart barChart, List<BarEntry> entries, String title){
+        entries.clear();
+        barChart.clear();
 
-    private void addYearSelection(Spinner yearSpinner) {
-        String sql = "select " +COLUMN_DATE+" from "+ TABLE_NAME;
-        Cursor c = sqLiteDatabase.rawQuery(sql, null);
-        HashSet<String> yearSet = new HashSet<>();
-
-        while (c.moveToNext()) {
-            String date = c.getString(c.getColumnIndexOrThrow(COLUMN_DATE));
-            String year = date.substring(0, 4); // Extract the first 4 characters as the year
-            yearSet.add(year);
+        Cursor cursor = null;
+        if(selectedYear==null || selectedYear.equals("All")){
+            cursor = sqLiteDatabase.rawQuery(sql, null);
+        }else{
+            cursor = sqLiteDatabase.rawQuery(sql,  new String[]{selectedYear + "%"});
         }
 
-        c.close();
-        ArrayList<String> yearList = new ArrayList<>(yearSet);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, yearList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        yearSpinner.setAdapter(adapter);
-    }
-
-    @SuppressLint("Range")
-    private void createBarchart(String sql, BarChart barChart, List<BarEntry> entries, String title){
-        Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
         int i = 0;
         if (cursor.getCount() == 0) {
             // listView.setVisibility(View.GONE);
@@ -158,10 +169,7 @@ public class RecordChartActivity extends AppCompatActivity {
                 entries.add(new BarEntry(i, cursor.getFloat(cursor.getColumnIndex("SUM")), cursor.getString(cursor.getColumnIndex(COLUMN_DATE))));
                 i++;
             }
-            for (int j = 0; j < dates.size(); j++) {
-                System.out.println(dates.get(j));
-            }
-            System.out.println(entries.size());
+
             BarDataSet dataSet = new BarDataSet(entries, "hkd"); // add entries to dataset
             BarData barData = new BarData(dataSet);
             barChart.setData(barData);
@@ -213,17 +221,23 @@ public class RecordChartActivity extends AppCompatActivity {
             barChart.invalidate(); // refresh
         }
     }
-
+    
     @SuppressLint("Range")
-    private float calculateTotal(String type) {
-        String sql = "SELECT SUM(money) AS total FROM " + TABLE_NAME + " WHERE type = '" + type + "'";
+    private float getTotalSum(String type, @Nullable String year) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT SUM(money) AS total FROM ").append(TABLE_NAME).append(" WHERE type = ?");
+        ArrayList<String> args = new ArrayList<>();
+        args.add(type);
+
+        if (!Objects.equals(year, "All")) {
+            sqlBuilder.append(" AND date LIKE ?");
+            args.add(year + "%");
+        }
+
         Cursor cursor = null;
         float total = 0;
-
         try {
-            sqLiteDatabase = openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE, null);
-            cursor = sqLiteDatabase.rawQuery(sql, null);
-
+            cursor = sqLiteDatabase.rawQuery(sqlBuilder.toString(), args.toArray(new String[0]));
             if (cursor.moveToFirst()) {
                 total = cursor.getFloat(cursor.getColumnIndex("total"));
             }
@@ -237,4 +251,22 @@ public class RecordChartActivity extends AppCompatActivity {
         }
         return total;
     }
+    private List<String> getYear(Spinner yearSpinner) {
+        String sql = "select " +COLUMN_DATE+" from "+ TABLE_NAME;
+        Cursor c = sqLiteDatabase.rawQuery(sql, null);
+        HashSet<String> yearSet = new HashSet<>();
+
+        while (c.moveToNext()) {
+            String date = c.getString(c.getColumnIndexOrThrow(COLUMN_DATE));
+            String year = date.substring(0, 4); // Extract the first 4 characters as the year
+            yearSet.add(year);
+        }
+
+        c.close();
+        ArrayList<String> yearList = new ArrayList<>();
+        yearList.add("All");  // Default item
+        yearList.addAll(yearSet);
+        return yearList;
+    }
+
 }
