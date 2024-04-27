@@ -59,7 +59,15 @@ public class SearchRecordActivity extends AppCompatActivity {
         while (cursor.moveToNext()) {
 
             float money = cursor.getFloat(cursor.getColumnIndex(COLUMN_MONEY));
-            sum=sum+money;
+            String type = cursor.getString(cursor.getColumnIndex(COLUMN_TYPE));
+            if (type.equals("Income"))
+            {
+                sum=sum+money;
+            }
+            if (type.equals("Expense"))
+            {
+                sum=sum-money;
+            }
 
             //list.add(map);
         }
